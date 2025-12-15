@@ -103,30 +103,4 @@
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-
-  const token = getCookie('token');
-
-  // Fetch locker stats
-  try {
-    const res = await fetch('/api/lockers', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    const lockers = await res.json();
-
-    document.getElementById('total-lockers').textContent = lockers.length;
-    document.getElementById('available-lockers').textContent = lockers.filter(l => l.status === 'available').length;
-    document.getElementById('reserved-lockers').textContent = lockers.filter(l => l.status === 'reserved').length;
-  } catch (err) {
-    console.error('Failed to fetch locker stats:', err);
-  }
-});
-</script>
+<script src="/js/pages/admin/dashboard.js"></script>

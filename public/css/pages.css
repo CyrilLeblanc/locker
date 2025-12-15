@@ -1,0 +1,14 @@
+/* Common styles for auth pages */
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+/* Locker card animations */
+.locker-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.locker-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}

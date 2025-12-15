@@ -2,25 +2,12 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../../models/user.js';
 import { sendPasswordResetEmail } from '../../core/mailer.js';
+import { JWT_SECRET, JWT_EXPIRES_IN, COOKIE_MAX_AGE } from '../../core/config.js';
+import { validateEmail, validatePassword, PASSWORD_ERROR_MESSAGE } from '../../utils/validation.js';
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
-
-// Validation helpers
-const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^()_+=\-]{8,}$/;
-
-const validateEmail = (email) => EMAIL_REGEX.test(email);
-const validatePassword = (password) => PASSWORD_REGEX.test(password);
-
-const PASSWORD_ERROR_MESSAGE = 'Password must be at least 8 characters long and contain at least one letter and one number.';
-
 // Registration endpoint
-router.get('/login', (req, res) => {
-  res.render('pages/login');
-});
-
 router.post('/register', async (req, res) => {
   // #swagger.tags = ['Auth']
   // #swagger.summary = 'Register a new user'
@@ -76,27 +63,19 @@ router.post('/login', async (req, res) => {
     if (!valid) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
-    const token = jwt.sign({ email: user.email, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ email: user.email, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     
     // Set token as HTTP-only cookie for page routes
     res.cookie('token', token, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 3600000 // 1 hour
+      maxAge: COOKIE_MAX_AGE
     });
 
-    // Redirect admin users to their area
-    if (user.role === 'admin') {
-      return res.redirect('/admin');
-    }
-
-    // Redirect to homepage if the request comes from a form submission
-    if (req.headers['accept'] && req.headers['accept'].includes('text/html')) {
-      return res.redirect('/');
-    }
-
-    res.json({ message: 'Login successful.', token });
+    // Return JSON with redirect URL based on user role
+    const redirectUrl = user.role === 'admin' ? '/admin' : '/';
+    res.json({ message: 'Login successful.', token, redirectUrl });
   } catch (err) {
     res.status(500).json({ error: 'Login failed.', details: err.message });
   }

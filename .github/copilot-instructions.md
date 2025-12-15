@@ -24,9 +24,28 @@ views/
 ├── layouts/main.ejs    # Base layout with Bootstrap
 ├── pages/              # Page templates (pass title and user)
 └── partials/           # nav.ejs, footer.ejs
+public/
+├── css/            # Shared stylesheets
+└── js/
+    └── pages/      # Client-side JavaScript (organized by page/feature)
+        ├── admin/  # Admin-specific scripts
+        └── user/   # User-specific scripts
 ```
 
 ## Key Conventions
+
+### Frontend JavaScript
+- **All client-side JavaScript is externalized** to `public/js/pages/`
+- No inline `<script>` tags in EJS files (except for passing server-side data)
+- Each page has its own dedicated JS file (e.g., `login.js`, `admin/dashboard.js`)
+- Common styles in `public/css/pages.css`
+- Example: `views/pages/login.ejs` → `public/js/pages/login.js`
+
+When adding new pages:
+1. Create the EJS template in `views/pages/`
+2. Create corresponding JS file in `public/js/pages/`
+3. Reference JS file: `<script src="/js/pages/your-page.js"></script>`
+4. Pass dynamic data via `window.CONFIG` if needed
 
 ### Mongoose Models
 Models use static methods for common queries instead of direct `find()` calls:

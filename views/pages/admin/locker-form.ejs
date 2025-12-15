@@ -56,64 +56,9 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-
-  const token = getCookie('token');
-  const isEdit = <%= isEdit ? 'true' : 'false' %>;
-  const lockerId = '<%= typeof lockerId !== "undefined" ? lockerId : "" %>';
-  const form = document.getElementById('locker-form');
-  const alertContainer = document.getElementById('alert-container');
-
-  // If editing, load existing locker data
-  if (isEdit && lockerId) {
-    try {
-      const res = await fetch(`/api/lockers/${lockerId}`);
-      if (res.ok) {
-        const locker = await res.json();
-        form.elements['number'].value = locker.number;
-        form.elements['size'].value = locker.size;
-        form.elements['status'].value = locker.status;
-        form.elements['price'].value = locker.price;
-      } else {
-        alert('Failed to load locker data');
-      }
-    } catch (err) {
-      console.error('Failed to fetch locker data:', err);
-    }
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-      const res = await fetch(isEdit ? `/api/lockers/${lockerId}` : '/api/lockers', {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (res.ok) {
-        alert('Locker saved successfully');
-        window.location.href = '/admin/lockers';
-      } else {
-        const error = await res.json();
-        alert(error.message || 'Failed to save locker');
-      }
-    } catch (err) {
-      console.error('Failed to save locker:', err);
-      alert('Failed to save locker');
-    }
-  });
-});
+  window.LOCKER_FORM_CONFIG = {
+    isEdit: <%= isEdit ? 'true' : 'false' %>,
+    lockerId: '<%= typeof lockerId !== "undefined" ? lockerId : "" %>'
+  };
 </script>
+<script src="/js/pages/admin/locker-form.js"></script>

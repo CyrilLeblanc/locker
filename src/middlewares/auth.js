@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+import { JWT_SECRET } from '../core/config.js';
 
 /**
  * Helper function to verify JWT token and get user
@@ -28,16 +27,23 @@ const verifyTokenAndGetUser = async (token) => {
 };
 
 /**
- * Middleware to verify JWT token from Authorization header (for API routes)
+ * Middleware to verify JWT token from Authorization header or cookie (for API routes)
  */
 export const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // Check Authorization header first, then fall back to cookie
+  let token;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
+  if (!token) {
     return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
 
-  const token = authHeader.split(' ')[1];
   const { user, error } = await verifyTokenAndGetUser(token);
 
   if (error) {
