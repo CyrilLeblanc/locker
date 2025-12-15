@@ -6,6 +6,29 @@ import { sendReservationConfirmedEmail, sendReservationReturnedEmail } from '../
 
 const router = express.Router();
 
+// Get all reservations (admin only)
+router.get('/all', authenticate, async (req, res) => {
+  // #swagger.tags = ['Reservations']
+  // #swagger.summary = 'Get all reservations (Admin)'
+  // #swagger.description = 'Retrieve all reservations from all users (admin only)'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  
+  // Check if user is admin
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+  }
+
+  try {
+    const reservations = await Reservation.find()
+      .populate('locker', 'number location')
+      .populate('user', 'username email')
+      .sort({ createdAt: -1 });
+    res.json(reservations);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch reservations.', details: err.message });
+  }
+});
+
 // Get current user's reservations
 router.get('/', authenticate, async (req, res) => {
   // #swagger.tags = ['Reservations']

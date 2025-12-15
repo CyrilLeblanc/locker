@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>';
 
     try {
-      const res = await fetch('/api/reservations');
+      const res = await fetch('/api/reservations/all');
 
       if (!res.ok) {
         throw new Error('Failed to fetch reservations');

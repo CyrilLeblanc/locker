@@ -51,17 +51,12 @@ const doc = {
     },
     Reservation: {
       lockerId: '60d5ec49f1b2c72b8c8e1234',
-      startDate: '2025-12-15T10:00:00Z',
-      endDate: '2025-12-20T10:00:00Z',
+      hours: 24,
     },
   },
 };
 
 const outputFile = './swagger-output.json';
-const routes = [
-  './src/routes/api/auth.js',
-  './src/routes/api/lockers.js',
-  './src/routes/api/reservations.js'
-];
+const routes = ['./src/routes/api/index.js'];
 
-swaggerAutogen()(outputFile, routes, doc);
+swaggerAutogen({ openapi: '3.0.0' })(outputFile, routes, doc);

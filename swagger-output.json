@@ -1,12 +1,15 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.0",
   "info": {
     "version": "1.0.0",
     "title": "Locker API",
     "description": "API for the Locker Reservation System - Reserve lockers online with automatic expiration and email notifications."
   },
-  "host": "localhost:3000",
-  "basePath": "/api",
+  "servers": [
+    {
+      "url": "http://localhost:3000/api"
+    }
+  ],
   "tags": [
     {
       "name": "Auth",
@@ -21,69 +24,8 @@
       "description": "Reservation management endpoints"
     }
   ],
-  "schemes": [
-    "http"
-  ],
-  "securityDefinitions": {
-    "bearerAuth": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "Authorization",
-      "description": "JWT token (format: Bearer <token>)"
-    }
-  },
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
   "paths": {
-    "/login": {
-      "get": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Login user",
-        "description": "Authenticate user and return JWT token",
-        "parameters": [
-          {
-            "name": "accept",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "User login credentials",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Login"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/register": {
+    "/auth/register": {
       "post": {
         "tags": [
           "Auth"
@@ -97,7 +39,7 @@
             "description": "User registration data",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/components/schemas/User"
             }
           }
         ],
@@ -114,10 +56,78 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "example": "any"
+                  },
+                  "email": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
-    "/logout": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login user",
+        "description": "Authenticate user and return JWT token",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User login credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
       "post": {
         "tags": [
           "Auth"
@@ -131,7 +141,7 @@
         }
       }
     },
-    "/forgot-password": {
+    "/auth/forgot-password": {
       "post": {
         "tags": [
           "Auth"
@@ -165,10 +175,24 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
-    "/reset-password": {
+    "/auth/reset-password": {
       "post": {
         "tags": [
           "Auth"
@@ -206,10 +230,325 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
-    "/": {
+    "/lockers/": {
+      "get": {
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Get all lockers",
+        "description": "Retrieve a list of all lockers. Optionally filter by status.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status (available, reserved, maintenance)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Create a new locker",
+        "description": "Create a new locker (Admin only)",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Locker data",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Locker"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "example": "any"
+                  },
+                  "size": {
+                    "example": "any"
+                  },
+                  "status": {
+                    "example": "any"
+                  },
+                  "price": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lockers/{id}": {
+      "get": {
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Get locker by ID",
+        "description": "Retrieve a single locker by its ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Update a locker",
+        "description": "Update an existing locker (Admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Locker data to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Locker"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "example": "any"
+                  },
+                  "size": {
+                    "example": "any"
+                  },
+                  "status": {
+                    "example": "any"
+                  },
+                  "price": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Delete a locker",
+        "description": "Delete a locker by ID (Admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reservations/all": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Get all reservations (Admin)",
+        "description": "Retrieve all reservations from all users (admin only)",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reservations/": {
       "get": {
         "tags": [
           "Reservations"
@@ -220,7 +559,9 @@
           {
             "name": "authorization",
             "in": "header",
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -250,7 +591,9 @@
           {
             "name": "authorization",
             "in": "header",
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "body",
@@ -258,7 +601,7 @@
             "description": "Reservation data",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Reservation"
+              "$ref": "#/components/schemas/Reservation"
             }
           }
         ],
@@ -272,9 +615,6 @@
           "401": {
             "description": "Unauthorized"
           },
-          "403": {
-            "description": "Forbidden"
-          },
           "404": {
             "description": "Not Found"
           },
@@ -289,10 +629,27 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lockerId": {
+                    "example": "any"
+                  },
+                  "hours": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/{id}": {
+    "/reservations/{id}": {
       "get": {
         "tags": [
           "Reservations"
@@ -304,62 +661,15 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Lockers"
-        ],
-        "summary": "Update a locker",
-        "description": "Update an existing locker (Admin only)",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Locker data to update",
-            "required": true,
             "schema": {
-              "$ref": "#/definitions/Locker"
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -367,9 +677,6 @@
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "401": {
             "description": "Unauthorized"
           },
@@ -378,9 +685,6 @@
           },
           "404": {
             "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
           },
           "500": {
             "description": "Internal Server Error"
@@ -403,12 +707,16 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "authorization",
             "in": "header",
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -439,73 +747,79 @@
       }
     }
   },
-  "definitions": {
-    "User": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string",
-          "example": "johndoe"
-        },
-        "email": {
-          "type": "string",
-          "example": "john@example.com"
-        },
-        "password": {
-          "type": "string",
-          "example": "Password123"
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123"
+          }
+        }
+      },
+      "Locker": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string",
+            "example": "A001"
+          },
+          "size": {
+            "type": "string",
+            "example": "medium"
+          },
+          "status": {
+            "type": "string",
+            "example": "available"
+          },
+          "price": {
+            "type": "number",
+            "example": 10
+          }
+        }
+      },
+      "Reservation": {
+        "type": "object",
+        "properties": {
+          "lockerId": {
+            "type": "string",
+            "example": "60d5ec49f1b2c72b8c8e1234"
+          },
+          "hours": {
+            "type": "number",
+            "example": 24
+          }
         }
       }
     },
-    "Login": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string",
-          "example": "john@example.com"
-        },
-        "password": {
-          "type": "string",
-          "example": "Password123"
-        }
-      }
-    },
-    "Locker": {
-      "type": "object",
-      "properties": {
-        "number": {
-          "type": "string",
-          "example": "A001"
-        },
-        "size": {
-          "type": "string",
-          "example": "medium"
-        },
-        "status": {
-          "type": "string",
-          "example": "available"
-        },
-        "price": {
-          "type": "number",
-          "example": 10
-        }
-      }
-    },
-    "Reservation": {
-      "type": "object",
-      "properties": {
-        "lockerId": {
-          "type": "string",
-          "example": "60d5ec49f1b2c72b8c8e1234"
-        },
-        "startDate": {
-          "type": "string",
-          "example": "2025-12-15T10:00:00Z"
-        },
-        "endDate": {
-          "type": "string",
-          "example": "2025-12-20T10:00:00Z"
-        }
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "JWT token (format: Bearer <token>)"
       }
     }
   }
