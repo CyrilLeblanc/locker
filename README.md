@@ -69,7 +69,7 @@ Admins can manage lockers (create, update, delete) and monitor reservations.
 ### Prerequisites
 
 - Node.js >= 18.x
-- Docker & Docker Compose (for MongoDB)
+- Docker & Docker Compose (for MongoDB and MailCatcher)
 - npm or yarn
 
 ### Installation
@@ -100,6 +100,7 @@ Admins can manage lockers (create, update, delete) and monitor reservations.
    - App: http://localhost:3000
    - API Docs (Swagger): http://localhost:3000/api-docs
    - Mongo Express (DB Admin): http://localhost:8081
+   - MailCatcher (Email testing): http://localhost:1080
 
 ## 🔧 Environment Variables
 
