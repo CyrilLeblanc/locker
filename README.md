@@ -10,7 +10,6 @@ A web application for online locker reservations, similar to cinema seat booking
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [Project Structure](#project-structure)
-- [License](#license)
 
 ## 🎯 Overview
 
