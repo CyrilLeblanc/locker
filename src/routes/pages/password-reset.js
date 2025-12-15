@@ -1,13 +1,9 @@
 import express from 'express';
+import { renderPage, renderPageWithParams } from '../../utils/render.js';
 
 const router = express.Router();
 
-router.get('/forgot-password', (req, res) => {
-  res.render('pages/forgot-password', {
-    title: 'Mot de passe oublié',
-    user: null
-  });
-});
+router.get('/forgot-password', renderPage('pages/forgot-password', 'Mot de passe oublié'));
 
 router.get('/reset-password', (req, res) => {
   const { token } = req.query;

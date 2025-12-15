@@ -1,7 +1,7 @@
 import express from 'express';
 import Reservation from '../../models/reservation.js';
 import Locker from '../../models/locker.js';
-import { authenticate } from '../../middlewares/auth.js';
+import { authenticate, canAccessResource } from '../../middlewares/auth.js';
 import { sendReservationConfirmedEmail, sendReservationReturnedEmail } from '../../core/mailer.js';
 
 const router = express.Router();
@@ -34,7 +34,7 @@ router.get('/:id', authenticate, async (req, res) => {
     }
 
     // Only allow user to view their own reservations (or admin)
-    if (reservation.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (!canAccessResource(req.user, reservation.user)) {
       return res.status(403).json({ error: 'Access denied.' });
     }
 
@@ -144,7 +144,7 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
 
     // Only allow user to cancel their own reservations (or admin)
-    if (reservation.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (!canAccessResource(req.user, reservation.user)) {
       return res.status(403).json({ error: 'Access denied.' });
     }
 

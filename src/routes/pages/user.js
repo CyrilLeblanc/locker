@@ -1,30 +1,16 @@
 import express from 'express';
 import { authenticatePage } from '../../middlewares/auth.js';
+import { renderPage } from '../../utils/render.js';
 
 const router = express.Router();
 
 // User dashboard
-router.get('/dashboard', authenticatePage, (req, res) => {
-  res.render('pages/user/dashboard', {
-    title: 'Mon Espace',
-    user: req.user
-  });
-});
+router.get('/dashboard', authenticatePage, renderPage('pages/user/dashboard', 'Mon Espace'));
 
 // Browse available lockers
-router.get('/lockers', authenticatePage, (req, res) => {
-  res.render('pages/user/lockers', {
-    title: 'Casiers Disponibles',
-    user: req.user
-  });
-});
+router.get('/lockers', authenticatePage, renderPage('pages/user/lockers', 'Casiers Disponibles'));
 
 // User reservations
-router.get('/reservations', authenticatePage, (req, res) => {
-  res.render('pages/user/reservations', {
-    title: 'Mes Réservations',
-    user: req.user
-  });
-});
+router.get('/reservations', authenticatePage, renderPage('pages/user/reservations', 'Mes Réservations'));
 
 export default router;

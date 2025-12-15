@@ -7,6 +7,15 @@ const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
+// Validation helpers
+const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^()_+=\-]{8,}$/;
+
+const validateEmail = (email) => EMAIL_REGEX.test(email);
+const validatePassword = (password) => PASSWORD_REGEX.test(password);
+
+const PASSWORD_ERROR_MESSAGE = 'Password must be at least 8 characters long and contain at least one letter and one number.';
+
 // Registration endpoint
 router.get('/login', (req, res) => {
   res.render('pages/login');
@@ -27,14 +36,12 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'All fields are required.' });
   }
   // Email format validation
-  const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  if (!emailRegex.test(email)) {
+  if (!validateEmail(email)) {
     return res.status(400).json({ error: 'Invalid email format.' });
   }
-  // Password strength validation (min 8 chars, 1 letter, 1 number)
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^()_+=\-]{8,}$/;
-  if (!passwordRegex.test(password)) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters long and contain at least one letter and one number.' });
+  // Password strength validation
+  if (!validatePassword(password)) {
+    return res.status(400).json({ error: PASSWORD_ERROR_MESSAGE });
   }
   try {
     const existingUser = await User.findUserByEmail(email);
@@ -155,9 +162,8 @@ router.post('/reset-password', async (req, res) => {
   }
   
   // Password strength validation
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^()_+=\-]{8,}$/;
-  if (!passwordRegex.test(password)) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters long and contain at least one letter and one number.' });
+  if (!validatePassword(password)) {
+    return res.status(400).json({ error: PASSWORD_ERROR_MESSAGE });
   }
   
   try {
