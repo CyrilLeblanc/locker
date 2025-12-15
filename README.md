@@ -9,7 +9,6 @@ A web application for online locker reservations, similar to cinema seat booking
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
-- [API Endpoints](#api-endpoints)
 - [Project Structure](#project-structure)
 - [License](#license)
 
@@ -43,27 +42,27 @@ Admins can manage lockers (create, update, delete) and monitor reservations.
 ### Authentication & User Management
 - [x] User registration with email/password
 - [x] User login with JWT tokens
-- [ ] Password reset via email
-- [ ] User roles (User / Admin)
+- [x] Password reset via email
+- [x] User roles (User / Admin)
 
 ### Locker Management (Admin)
-- [ ] Add, edit, delete lockers
-- [ ] Locker properties: Number, Size, Status, Price
+- [x] Add, edit, delete lockers
+- [x] Locker properties: Number, Size, Status, Price
 
 ### Reservation System
-- [ ] Browse available lockers
-- [ ] Select locker and reservation duration
-- [ ] Reservation confirmation
+- [x] Browse available lockers
+- [x] Select locker and reservation duration
+- [x] Reservation confirmation
 - [ ] Optional: Stripe payment integration (mock)
 
 ### Automatic Expiration
-- [ ] Automated reservation expiration handling
-- [ ] Locker auto-release when reservation ends
+- [x] Automated reservation expiration handling
+- [x] Locker auto-release when reservation ends
 
 ### Email Notifications
-- [ ] Reservation confirmation email
-- [ ] Reminder before expiration
-- [ ] Password reset email
+- [x] Reservation confirmation email
+- [x] Reminder before expiration
+- [x] Password reset email
 
 ## 🚀 Getting Started
 
@@ -91,19 +90,10 @@ Admins can manage lockers (create, update, delete) and monitor reservations.
    docker compose up -d
    ```
 
-4. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
 5. **Run the application**
    ```bash
    # Development mode (with hot-reload)
    npm run dev
-
-   # Production mode
-   npm start
    ```
 
 6. **Access the application**
@@ -120,7 +110,7 @@ Create a `.env` file in the root directory:
 PORT=3000
 
 # MongoDB
-MONGO_USERNAME=root
+MONGO_USERNAME=appuser
 MONGO_PASSWORD=example
 MONGO_HOST=localhost
 MONGO_PORT=27017
@@ -131,40 +121,10 @@ JWT_SECRET=your-super-secret-jwt-key
 JWT_EXPIRES_IN=7d
 
 # Email (for notifications)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your-email@example.com
-SMTP_PASS=your-email-password
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_FROM=donotrespond@locker.com
 ```
-
-## 📡 API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register a new user |
-| POST | `/api/auth/login` | Login and get JWT token |
-| POST | `/api/auth/forgot-password` | Request password reset |
-| POST | `/api/auth/reset-password` | Reset password with token |
-
-### Lockers
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/lockers` | Get all lockers |
-| GET | `/api/lockers/:id` | Get locker by ID |
-| POST | `/api/lockers` | Create locker (Admin) |
-| PUT | `/api/lockers/:id` | Update locker (Admin) |
-| DELETE | `/api/lockers/:id` | Delete locker (Admin) |
-
-### Reservations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/reservations` | Get user's reservations |
-| POST | `/api/reservations` | Create a reservation |
-| DELETE | `/api/reservations/:id` | Cancel a reservation |
 
 ## 📁 Project Structure
 
@@ -203,7 +163,9 @@ locker/
   username: String,
   email: String (unique),
   passwordHash: String,
-  role: String (enum: ['user', 'admin'])
+  role: String (enum: ['user', 'admin']),
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 }
 ```
 
@@ -224,22 +186,7 @@ locker/
   locker: ObjectId (ref: Locker),
   startDate: Date,
   endDate: Date,
-  status: String (enum: ['active', 'expired', 'cancelled'])
+  status: String (enum: ['active', 'expired', 'cancelled']),
+  reminderSent: Boolean (default: false)
 }
 ```
-
-## 🧪 Running Tests
-
-```bash
-npm test
-```
-
-> Note: Tests are not yet implemented.
-
-## 📝 License
-
-ISC
-
----
-
-Made with ❤️ by [CyrilLeblanc](https://github.com/CyrilLeblanc)
