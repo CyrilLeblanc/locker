@@ -11,6 +11,7 @@ const swaggerDocument = require('./swagger-output.json');
 import mainRouter from './src/routes/index.js';
 import mongoose from "mongoose";
 import { seedDatabase } from './src/core/seed.js';
+import { startBackgroundJobs } from './src/core/jobs.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ mongoose.connect(`mongodb://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DB_NAME}`,
 }).then(async () => {
   console.log("Connected to MongoDB");
   await seedDatabase();
+  startBackgroundJobs();
 }).catch((error) => {
   console.error("Error connecting to MongoDB:", error);
 });

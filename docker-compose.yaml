@@ -22,5 +22,12 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME:-mongoexpressuser}
       ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD:-mongoexpresspass}
 
+  mailcatcher:
+    image: schickling/mailcatcher
+    restart: always
+    ports:
+      - 1080:1080  # Web UI
+      - 1025:1025  # SMTP
+
 volumes:
   mongo-data:

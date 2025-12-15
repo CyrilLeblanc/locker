@@ -260,9 +260,6 @@
       return;
     }
 
-    // Calculate end date as timestamp
-    const endDate = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
-
     try {
       const response = await fetch('/api/reservations', {
         method: 'POST',
@@ -270,7 +267,7 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ lockerId, endDate })
+        body: JSON.stringify({ lockerId, hours })
       });
 
       const data = await response.json();

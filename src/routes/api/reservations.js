@@ -2,6 +2,7 @@ import express from 'express';
 import Reservation from '../../models/reservation.js';
 import Locker from '../../models/locker.js';
 import { authenticate } from '../../middlewares/auth.js';
+import { sendReservationConfirmedEmail, sendReservationReturnedEmail } from '../../core/mailer.js';
 
 const router = express.Router();
 
@@ -113,6 +114,13 @@ router.post('/', authenticate, async (req, res) => {
     // Populate locker info for response
     await reservation.populate('locker');
 
+    // Send confirmation email
+    try {
+      await sendReservationConfirmedEmail(req.user.email, reservation, locker);
+    } catch (emailErr) {
+      console.error('Failed to send reservation confirmation email:', emailErr.message);
+    }
+
     res.status(201).json({ 
       message: 'Reservation created successfully.', 
       reservation 
@@ -153,6 +161,13 @@ router.delete('/:id', authenticate, async (req, res) => {
     if (locker) {
       locker.status = 'available';
       await locker.save();
+    }
+
+    // Send return confirmation email
+    try {
+      await sendReservationReturnedEmail(req.user.email, reservation, locker);
+    } catch (emailErr) {
+      console.error('Failed to send reservation return email:', emailErr.message);
     }
 
     res.json({ message: 'Reservation cancelled successfully.' });
