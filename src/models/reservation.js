@@ -5,7 +5,8 @@ const reservationSchema = new mongoose.Schema({
   locker: { type: mongoose.Schema.Types.ObjectId, ref: 'Locker', required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  status: { type: String, enum: ['active', 'expired', 'cancelled'], default: 'active' }
+  status: { type: String, enum: ['active', 'expired', 'cancelled'], default: 'active' },
+  reminderSent: { type: Boolean, default: false }
 }, {
   timestamps: true
 });
@@ -25,6 +26,18 @@ reservationSchema.statics.findExpired = function() {
   return this.find({ 
     status: 'active', 
     endDate: { $lt: new Date() } 
+  }).populate('locker').populate('user');
+};
+
+// Find reservations that need reminder emails (1 hour before expiration)
+reservationSchema.statics.findNeedingReminder = function() {
+  const now = new Date();
+  const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+  
+  return this.find({
+    status: 'active',
+    reminderSent: false,
+    endDate: { $gte: now, $lte: oneHourFromNow }
   }).populate('locker').populate('user');
 };
 

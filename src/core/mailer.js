@@ -107,6 +107,39 @@ export const sendReservationReturnedEmail = async (email, reservation, locker) =
 };
 
 /**
+ * Send reminder email before reservation expires
+ */
+export const sendReservationReminderEmail = async (email, reservation, locker) => {
+  const mailOptions = {
+    from: FROM_EMAIL,
+    to: email,
+    subject: `⏰ Rappel - Votre casier expire bientôt - Casier n°${locker.number} - Locker`,
+    html: `
+      <h2>⏰ Votre réservation expire bientôt !</h2>
+      <p>Votre réservation pour le casier suivant arrive à expiration dans moins d'une heure :</p>
+      <table style="border-collapse: collapse; margin: 20px 0;">
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Casier</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">n°${locker.number} - ${locker.location}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Taille</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${locker.size}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;"><strong>Date d'expiration</strong></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${formatDate(reservation.endDate)}</td>
+        </tr>
+      </table>
+      <p><strong>Action requise :</strong> Pensez à libérer votre casier avant l'expiration pour éviter une libération automatique.</p>
+      <p>Si vous avez terminé, vous pouvez annuler votre réservation depuis votre espace personnel.</p>
+    `
+  };
+
+  return transporter.sendMail(mailOptions);
+};
+
+/**
  * Send reservation expired email
  */
 export const sendReservationExpiredEmail = async (email, reservation, locker) => {

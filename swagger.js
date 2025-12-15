@@ -54,6 +54,39 @@ const doc = {
       hours: 24,
     },
   },
+  '@definitions': {
+    User: {
+      type: 'object',
+      properties: {
+        username: { type: 'string', example: 'johndoe' },
+        email: { type: 'string', example: 'john@example.com' },
+        password: { type: 'string', example: 'Password123' }
+      }
+    },
+    Login: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'john@example.com' },
+        password: { type: 'string', example: 'Password123' }
+      }
+    },
+    Locker: {
+      type: 'object',
+      properties: {
+        number: { type: 'string', example: 'A001' },
+        size: { type: 'string', enum: ['small', 'medium', 'large'], example: 'medium' },
+        status: { type: 'string', enum: ['available', 'reserved', 'maintenance'], example: 'available' },
+        price: { type: 'number', example: 10.0 }
+      }
+    },
+    Reservation: {
+      type: 'object',
+      properties: {
+        lockerId: { type: 'string', example: '60d5ec49f1b2c72b8c8e1234' },
+        hours: { type: 'number', example: 24 }
+      }
+    }
+  }
 };
 
 const outputFile = './swagger-output.json';
