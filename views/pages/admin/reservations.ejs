@@ -1,0 +1,194 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Manage Reservations</h1>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label for="filter-status" class="form-label">Status</label>
+        <select id="filter-status" class="form-select">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="expired">Expired</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button id="btn-filter" class="btn btn-primary">Apply Filters</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reservations Table -->
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover" id="reservations-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Locker</th>
+            <th>User</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="7" class="text-center text-muted">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Cancellation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to cancel this reservation?</p>
+        <p class="text-warning">The locker will be made available again.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-cancel">Cancel Reservation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  const token = getCookie('token');
+  let reservationToCancel = null;
+
+  const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+
+  // Fetch and render reservations
+  async function loadReservations(filters = {}) {
+    const tbody = document.querySelector('#reservations-table tbody');
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>';
+
+    try {
+      const res = await fetch('/api/reservations', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch reservations');
+      }
+
+      let reservations = await res.json();
+
+      // Client-side status filter
+      if (filters.status) {
+        reservations = reservations.filter(r => r.status === filters.status);
+      }
+
+      if (reservations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No reservations found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = reservations.map(reservation => `
+        <tr>
+          <td><code>${reservation._id.slice(-6)}</code></td>
+          <td><strong>${reservation.locker?.number || 'N/A'}</strong></td>
+          <td>${reservation.user?.username || reservation.user || 'N/A'}</td>
+          <td>${formatDate(reservation.startDate)}</td>
+          <td>${formatDate(reservation.endDate)}</td>
+          <td>${getStatusBadge(reservation.status)}</td>
+          <td>
+            ${reservation.status === 'active' ? `
+              <button class="btn btn-sm btn-outline-danger btn-cancel" data-id="${reservation._id}">Cancel</button>
+            ` : '-'}
+          </td>
+        </tr>
+      `).join('');
+
+      // Add cancel listeners
+      document.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', () => {
+          reservationToCancel = btn.dataset.id;
+          cancelModal.show();
+        });
+      });
+
+    } catch (err) {
+      console.error('Failed to fetch reservations:', err);
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load reservations. Make sure you are logged in as admin.</td></tr>';
+    }
+  }
+
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  }
+
+  function getStatusBadge(status) {
+    const badges = {
+      active: 'bg-success',
+      expired: 'bg-secondary',
+      cancelled: 'bg-danger'
+    };
+    return `<span class="badge ${badges[status] || 'bg-secondary'}">${status}</span>`;
+  }
+
+  // Filter button
+  document.getElementById('btn-filter').addEventListener('click', () => {
+    const status = document.getElementById('filter-status').value;
+    loadReservations({ status });
+  });
+
+  // Confirm cancel
+  document.getElementById('btn-confirm-cancel').addEventListener('click', async () => {
+    if (!reservationToCancel) return;
+
+    try {
+      const res = await fetch(`/api/reservations/${reservationToCancel}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        cancelModal.hide();
+        loadReservations();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to cancel reservation');
+      }
+    } catch (err) {
+      console.error('Cancel failed:', err);
+      alert('Failed to cancel reservation');
+    }
+  });
+
+  // Initial load
+  loadReservations();
+});
+</script>

@@ -1,0 +1,281 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-house-door me-2"></i>Mon Espace</h1>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-muted mb-1">Réservations Actives</h6>
+            <h2 class="mb-0 text-primary" id="active-reservations">-</h2>
+          </div>
+          <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+            <i class="bi bi-calendar-check fs-4 text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-muted mb-1">Casiers Disponibles</h6>
+            <h2 class="mb-0 text-success" id="available-lockers">-</h2>
+          </div>
+          <div class="bg-success bg-opacity-10 rounded-circle p-3">
+            <i class="bi bi-box-seam fs-4 text-success"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-muted mb-1">Historique</h6>
+            <h2 class="mb-0 text-secondary" id="total-reservations">-</h2>
+          </div>
+          <div class="bg-secondary bg-opacity-10 rounded-circle p-3">
+            <i class="bi bi-clock-history fs-4 text-secondary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- My Active Reservations -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="bi bi-calendar2-week me-2"></i>Mes Réservations Actives</h5>
+      <a href="/lockers" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Nouvelle Réservation
+      </a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div id="active-reservations-list">
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reservation History -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historique des Réservations</h5>
+  </div>
+  <div class="card-body">
+    <div id="reservation-history">
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+  
+  async function fetchWithAuth(url) {
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  }
+
+  function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function formatDuration(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const hours = Math.round((end - start) / (1000 * 60 * 60));
+    return hours === 1 ? '1 heure' : `${hours} heures`;
+  }
+
+  function getRemainingTime(endDate) {
+    const now = new Date();
+    const end = new Date(endDate);
+    const remaining = end - now;
+    if (remaining <= 0) return 'Expirée';
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) return `${hours}h ${minutes}min restantes`;
+    return `${minutes} min restantes`;
+  }
+
+  function getStatusBadge(status) {
+    const badges = {
+      'active': '<span class="badge bg-success">Active</span>',
+      'expired': '<span class="badge bg-secondary">Expirée</span>',
+      'cancelled': '<span class="badge bg-danger">Annulée</span>'
+    };
+    return badges[status] || status;
+  }
+
+  function getSizeBadge(size) {
+    const badges = {
+      'small': '<span class="badge bg-info">Petit</span>',
+      'medium': '<span class="badge bg-warning text-dark">Moyen</span>',
+      'large': '<span class="badge bg-primary">Grand</span>'
+    };
+    return badges[size] || size;
+  }
+
+  async function cancelReservation(id) {
+    if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return;
+    
+    try {
+      const response = await fetch(`/api/reservations/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        loadData();
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Erreur lors de l\'annulation');
+      }
+    } catch (err) {
+      alert('Erreur lors de l\'annulation');
+    }
+  }
+
+  async function loadData() {
+    try {
+      const [reservations, lockers] = await Promise.all([
+        fetchWithAuth('/api/reservations'),
+        fetch('/api/lockers').then(r => r.json())
+      ]);
+
+      const activeReservations = reservations.filter(r => r.status === 'active');
+      const pastReservations = reservations.filter(r => r.status !== 'active');
+      const availableLockers = lockers.filter(l => l.status === 'available');
+
+      // Update stats
+      document.getElementById('active-reservations').textContent = activeReservations.length;
+      document.getElementById('available-lockers').textContent = availableLockers.length;
+      document.getElementById('total-reservations').textContent = reservations.length;
+
+      // Render active reservations
+      const activeList = document.getElementById('active-reservations-list');
+      if (activeReservations.length === 0) {
+        activeList.innerHTML = `
+          <div class="text-center py-5">
+            <i class="bi bi-calendar-x fs-1 text-muted"></i>
+            <p class="text-muted mt-2 mb-3">Aucune réservation active</p>
+            <a href="/lockers" class="btn btn-primary">
+              <i class="bi bi-plus-lg me-1"></i>Réserver un casier
+            </a>
+          </div>
+        `;
+      } else {
+        activeList.innerHTML = `
+          <div class="row g-3">
+            ${activeReservations.map(r => `
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-primary border-2">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h5 class="card-title mb-0">
+                        <i class="bi bi-box me-1"></i>Casier ${r.locker?.number || 'N/A'}
+                      </h5>
+                      ${getSizeBadge(r.locker?.size)}
+                    </div>
+                    <p class="card-text text-muted small mb-1">
+                      <i class="bi bi-hourglass-split me-1"></i>
+                      ${formatDuration(r.startDate, r.endDate)}
+                    </p>
+                    <p class="card-text small mb-2">
+                      <i class="bi bi-clock me-1"></i>
+                      <span class="text-primary fw-bold">${getRemainingTime(r.endDate)}</span>
+                    </p>
+                    <p class="card-text text-muted small mb-2">
+                      <i class="bi bi-calendar-range me-1"></i>
+                      Fin: ${formatDate(r.endDate)}
+                    </p>
+                    <p class="card-text">
+                      <strong>${r.locker?.price?.toFixed(2) || '0.00'} €</strong>
+                    </p>
+                  </div>
+                  <div class="card-footer bg-transparent border-top-0">
+                    <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelReservation('${r._id}')">
+                      <i class="bi bi-x-lg me-1"></i>Annuler
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // Render history
+      const historyList = document.getElementById('reservation-history');
+      if (pastReservations.length === 0) {
+        historyList.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Aucun historique de réservation</p>
+          </div>
+        `;
+      } else {
+        historyList.innerHTML = `
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Casier</th>
+                  <th>Taille</th>
+                  <th>Durée</th>
+                  <th>Fin</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pastReservations.map(r => `
+                  <tr>
+                    <td><i class="bi bi-box me-1"></i>${r.locker?.number || 'N/A'}</td>
+                    <td>${getSizeBadge(r.locker?.size)}</td>
+                    <td>${formatDuration(r.startDate, r.endDate)}</td>
+                    <td>${formatDate(r.endDate)}</td>
+                    <td>${getStatusBadge(r.status)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error('Error loading data:', err);
+    }
+  }
+
+  loadData();
+</script>

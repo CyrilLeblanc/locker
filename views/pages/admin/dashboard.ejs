@@ -1,0 +1,132 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Admin Dashboard</h1>
+</div>
+
+<div class="row g-4">
+  <!-- Stats Cards -->
+  <div class="col-md-4">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Total Lockers</h6>
+            <h2 class="mb-0" id="total-lockers">-</h2>
+          </div>
+          <i class="bi bi-box fs-1 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Available</h6>
+            <h2 class="mb-0" id="available-lockers">-</h2>
+          </div>
+          <i class="bi bi-check-circle fs-1 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Reserved</h6>
+            <h2 class="mb-0" id="reserved-lockers">-</h2>
+          </div>
+          <i class="bi bi-lock fs-1 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Quick Actions</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="/admin/lockers" class="btn btn-primary">
+            <i class="bi bi-box me-2"></i>Manage Lockers
+          </a>
+          <a href="/admin/lockers/new" class="btn btn-success">
+            <i class="bi bi-plus-circle me-2"></i>Add New Locker
+          </a>
+          <a href="/admin/reservations" class="btn btn-info text-white">
+            <i class="bi bi-calendar-check me-2"></i>View Reservations
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Reservations -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Reservations</h5>
+        <a href="/admin/reservations" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover" id="recent-reservations">
+            <thead>
+              <tr>
+                <th>Locker</th>
+                <th>User</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="text-center text-muted">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  const token = getCookie('token');
+
+  // Fetch locker stats
+  try {
+    const res = await fetch('/api/lockers', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const lockers = await res.json();
+
+    document.getElementById('total-lockers').textContent = lockers.length;
+    document.getElementById('available-lockers').textContent = lockers.filter(l => l.status === 'available').length;
+    document.getElementById('reserved-lockers').textContent = lockers.filter(l => l.status === 'reserved').length;
+  } catch (err) {
+    console.error('Failed to fetch locker stats:', err);
+  }
+});
+</script>
