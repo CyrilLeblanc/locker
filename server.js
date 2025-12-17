@@ -103,7 +103,7 @@ app.use(
     express.static(path.join(__dirname, "node_modules", "bootstrap", "dist"))
 );
 
-// Serve Bootstrap CSS and JS from node_modules
+// Serve Bootstrap icons from node_modules
 app.use(
     "/vendor/bootstrap-icons",
     express.static(path.join(__dirname, "node_modules", "bootstrap-icons"))
