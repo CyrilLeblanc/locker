@@ -10,13 +10,13 @@
  * @returns {Function} Express route handler
  */
 export const renderPage = (view, title, extraData = {}) => {
-  return (req, res) => {
-    res.render(view, {
-      title,
-      user: req.user || null,
-      ...extraData
-    });
-  };
+    return (req, res) => {
+        res.render(view, {
+            title,
+            user: req.user || null,
+            ...extraData,
+        });
+    };
 };
 
 /**
@@ -27,12 +27,12 @@ export const renderPage = (view, title, extraData = {}) => {
  * @returns {Function} Express route handler
  */
 export const renderPageWithParams = (view, title, dataFn) => {
-  return (req, res) => {
-    const extraData = dataFn ? dataFn(req) : {};
-    res.render(view, {
-      title,
-      user: req.user || null,
-      ...extraData
-    });
-  };
+    return (req, res) => {
+        const extraData = dataFn ? dataFn(req) : {};
+        res.render(view, {
+            title,
+            user: req.user || null,
+            ...extraData,
+        });
+    };
 };

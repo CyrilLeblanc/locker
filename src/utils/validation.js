@@ -8,4 +8,5 @@ export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&^()_+=\-]
 export const validateEmail = (email) => EMAIL_REGEX.test(email);
 export const validatePassword = (password) => PASSWORD_REGEX.test(password);
 
-export const PASSWORD_ERROR_MESSAGE = 'Password must be at least 8 characters long and contain at least one letter and one number.';
+export const PASSWORD_ERROR_MESSAGE =
+    "Password must be at least 8 characters long and contain at least one letter and one number.";
