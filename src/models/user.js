@@ -1,10 +1,16 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { validateEmail } from "../utils/validation.js";
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true, validate: {
+        validator: function (v) {
+            return validateEmail(v);
+        },
+        message: props => `${props.value} is not a valid email!`
+    } },
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     resetPasswordToken: { type: String },

@@ -13,7 +13,16 @@ const reservationSchema = new mongoose.Schema(
             required: true,
         },
         startDate: { type: Date, required: true },
-        endDate: { type: Date, required: true },
+        endDate: {
+            type: Date,
+            required: true,
+            validate: {
+                validator: function (value) {
+                    return value > this.startDate;
+                },
+                message: "End date must be after start date",
+            },
+        },
         status: {
             type: String,
             enum: ["active", "expired", "cancelled"],

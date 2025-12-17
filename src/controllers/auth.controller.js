@@ -10,8 +10,10 @@ import {
 
 /**
  * Register a new user
+ *
+ * Act as a middleware to login after registration
  */
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
     // #swagger.tags = ['Auth']
     // #swagger.summary = 'Register a new user'
     // #swagger.description = 'Create a new user account with username, email and password'
@@ -46,11 +48,9 @@ export const register = async (req, res) => {
             return res.status(409).json({ error: "Email already registered." });
         }
 
-        const user = await User.createUser({ username, email, password });
-        res.status(201).json({
-            message: "User registered successfully.",
-            user: { username: user.username, email: user.email },
-        });
+        await User.createUser({ username, email, password });
+
+        next();
     } catch (err) {
         res.status(500).json({
             error: "Registration failed.",
@@ -107,7 +107,7 @@ export const login = async (req, res) => {
         });
 
         // Return JSON with redirect URL based on user role
-        const redirectUrl = user.role === "admin" ? "/admin" : "/";
+        const redirectUrl = user.role === "admin" ? "/admin" : "/dashboard";
         res.json({ message: "Login successful.", user, redirectUrl });
     } catch (err) {
         res.status(500).json({ error: "Login failed.", details: err.message });
