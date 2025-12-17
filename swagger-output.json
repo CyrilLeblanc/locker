@@ -10,24 +10,14 @@
       "url": "http://localhost:3000/api"
     }
   ],
-  "tags": [
-    {
-      "name": "Auth",
-      "description": "Authentication endpoints (register, login, password reset)"
-    },
-    {
-      "name": "Lockers",
-      "description": "Locker management endpoints"
-    },
-    {
-      "name": "Reservations",
-      "description": "Reservation management endpoints"
-    }
-  ],
   "paths": {
     "/auth/register": {
       "post": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a new user",
+        "description": "Create a new user account with username, email and password",
         "responses": {
           "201": {
             "description": "Created"
@@ -43,21 +33,11 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "username": {
-                    "example": "any"
-                  },
-                  "email": {
-                    "example": "any"
-                  },
-                  "password": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/User"
               }
             }
           }
@@ -66,7 +46,11 @@
     },
     "/auth/login": {
       "post": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login user",
+        "description": "Authenticate user and return user data",
         "responses": {
           "200": {
             "description": "OK"
@@ -79,18 +63,11 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "example": "any"
-                  },
-                  "password": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/Login"
               }
             }
           }
@@ -99,7 +76,11 @@
     },
     "/auth/logout": {
       "post": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout user",
+        "description": "Clear the authentication cookie",
         "responses": {
           "200": {
             "description": "OK"
@@ -109,7 +90,11 @@
     },
     "/auth/forgot-password": {
       "post": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Request password reset",
+        "description": "Send a password reset email to the user",
         "responses": {
           "200": {
             "description": "OK"
@@ -122,13 +107,15 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "email": {
-                    "example": "any"
+                    "type": "string",
+                    "example": "user@example.com"
                   }
                 }
               }
@@ -139,7 +126,11 @@
     },
     "/auth/reset-password": {
       "post": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Reset password",
+        "description": "Reset user password using token from email",
         "responses": {
           "200": {
             "description": "OK"
@@ -152,16 +143,19 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "token": {
-                    "example": "any"
+                    "type": "string",
+                    "example": "reset-token-here"
                   },
                   "password": {
-                    "example": "any"
+                    "type": "string",
+                    "example": "NewPassword123"
                   }
                 }
               }
@@ -172,10 +166,44 @@
     },
     "/lockers/": {
       "get": {
-        "description": "",
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Get all lockers",
+        "description": "Retrieve a list of all lockers. Optionally filter by status.",
         "parameters": [
           {
             "name": "status",
+            "in": "query",
+            "description": "Filter by status (available, reserved, maintenance)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "in",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "required",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "schema",
             "in": "query",
             "schema": {
               "type": "string"
@@ -192,16 +220,11 @@
         }
       },
       "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "Lockers"
         ],
+        "summary": "Create a new locker",
+        "description": "Create a new locker (Admin only)",
         "responses": {
           "201": {
             "description": "Created"
@@ -222,25 +245,17 @@
             "description": "Internal Server Error"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "number": {
-                    "example": "any"
-                  },
-                  "size": {
-                    "example": "any"
-                  },
-                  "status": {
-                    "example": "any"
-                  },
-                  "price": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/Locker"
               }
             }
           }
@@ -249,7 +264,11 @@
     },
     "/lockers/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Get locker by ID",
+        "description": "Retrieve a single locker by its ID",
         "parameters": [
           {
             "name": "id",
@@ -273,19 +292,16 @@
         }
       },
       "put": {
-        "description": "",
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Update a locker",
+        "description": "Update an existing locker (Admin only)",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -314,44 +330,33 @@
             "description": "Internal Server Error"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "number": {
-                    "example": "any"
-                  },
-                  "size": {
-                    "example": "any"
-                  },
-                  "status": {
-                    "example": "any"
-                  },
-                  "price": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/Locker"
               }
             }
           }
         }
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "Lockers"
+        ],
+        "summary": "Delete a locker",
+        "description": "Delete a locker by ID (Admin only)",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -373,21 +378,21 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/reservations/all": {
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Get all reservations (Admin)",
+        "description": "Retrieve all reservations from all users (admin only)",
         "responses": {
           "200": {
             "description": "OK"
@@ -401,21 +406,21 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/reservations/": {
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Get user reservations",
+        "description": "Retrieve all reservations for the authenticated user",
         "responses": {
           "200": {
             "description": "OK"
@@ -426,19 +431,19 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Create a reservation",
+        "description": "Create a new locker reservation",
         "responses": {
           "201": {
             "description": "Created"
@@ -459,19 +464,17 @@
             "description": "Internal Server Error"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "lockerId": {
-                    "example": "any"
-                  },
-                  "hours": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/Reservation"
               }
             }
           }
@@ -480,19 +483,16 @@
     },
     "/reservations/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Get reservation by ID",
+        "description": "Retrieve a single reservation by its ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -514,22 +514,24 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Cancel a reservation",
+        "description": "Cancel an existing reservation",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -554,87 +556,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
   "components": {
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "example": "johndoe"
-          },
-          "email": {
-            "type": "string",
-            "example": "john@example.com"
-          },
-          "password": {
-            "type": "string",
-            "example": "Password123"
-          }
-        }
-      },
-      "Login": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": "john@example.com"
-          },
-          "password": {
-            "type": "string",
-            "example": "Password123"
-          }
-        }
-      },
-      "Locker": {
-        "type": "object",
-        "properties": {
-          "number": {
-            "type": "string",
-            "example": "A001"
-          },
-          "size": {
-            "type": "string",
-            "enum": [
-              "small",
-              "medium",
-              "large"
-            ],
-            "example": "medium"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "available",
-              "reserved",
-              "maintenance"
-            ],
-            "example": "available"
-          },
-          "price": {
-            "type": "number",
-            "example": 10
-          }
-        }
-      },
-      "Reservation": {
-        "type": "object",
-        "properties": {
-          "lockerId": {
-            "type": "string",
-            "example": "60d5ec49f1b2c72b8c8e1234"
-          },
-          "hours": {
-            "type": "number",
-            "example": 24
-          }
-        }
-      }
-    },
     "securitySchemes": {
       "bearerAuth": {
         "type": "apiKey",

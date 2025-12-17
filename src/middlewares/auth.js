@@ -27,18 +27,10 @@ const verifyTokenAndGetUser = async (token) => {
 };
 
 /**
- * Middleware to verify JWT token from Authorization header or cookie (for API routes)
+ * Middleware to verify JWT token from cookie (for API routes)
  */
 export const authenticate = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  
-  // Check Authorization header first, then fall back to cookie
-  let token;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.split(' ')[1];
-  } else if (req.cookies?.token) {
-    token = req.cookies.token;
-  }
+  const { token } = req.cookies;
 
   if (!token) {
     return res.status(401).json({ error: 'Access denied. No token provided.' });

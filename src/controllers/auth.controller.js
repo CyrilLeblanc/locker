@@ -8,6 +8,18 @@ import { validateEmail, validatePassword, PASSWORD_ERROR_MESSAGE } from '../util
  * Register a new user
  */
 export const register = async (req, res) => {
+  // #swagger.tags = ['Auth']
+  // #swagger.summary = 'Register a new user'
+  // #swagger.description = 'Create a new user account with username, email and password'
+  /* #swagger.requestBody = {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: '#/components/schemas/User' }
+          }
+        }
+  } */
+  
   const { username, email, password } = req.body;
   
   if (!username || !email || !password) {
@@ -44,6 +56,18 @@ export const register = async (req, res) => {
  * Login user and return JWT token
  */
 export const login = async (req, res) => {
+  // #swagger.tags = ['Auth']
+  // #swagger.summary = 'Login user'
+  // #swagger.description = 'Authenticate user and return user data'
+  /* #swagger.requestBody = {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: '#/components/schemas/Login' }
+          }
+        }
+  } */
+
   const { email, password } = req.body;
   
   try {
@@ -73,7 +97,7 @@ export const login = async (req, res) => {
 
     // Return JSON with redirect URL based on user role
     const redirectUrl = user.role === 'admin' ? '/admin' : '/';
-    res.json({ message: 'Login successful.', token, redirectUrl });
+    res.json({ message: 'Login successful.', user, redirectUrl });
   } catch (err) {
     res.status(500).json({ error: 'Login failed.', details: err.message });
   }
@@ -83,6 +107,10 @@ export const login = async (req, res) => {
  * Logout user (clear cookie)
  */
 export const logout = (req, res) => {
+  // #swagger.tags = ['Auth']
+  // #swagger.summary = 'Logout user'
+  // #swagger.description = 'Clear the authentication cookie'
+  
   res.clearCookie('token');
   res.json({ message: 'Logout successful.' });
 };
@@ -91,6 +119,23 @@ export const logout = (req, res) => {
  * Request password reset
  */
 export const forgotPassword = async (req, res) => {
+  // #swagger.tags = ['Auth']
+  // #swagger.summary = 'Request password reset'
+  // #swagger.description = 'Send a password reset email to the user'
+  /* #swagger.requestBody = {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: 'object',
+              properties: {
+                email: { type: 'string', example: 'user@example.com' }
+              }
+            }
+          }
+        }
+  } */
+  
   const { email } = req.body;
   
   if (!email) {
@@ -120,6 +165,24 @@ export const forgotPassword = async (req, res) => {
  * Reset password using token
  */
 export const resetPassword = async (req, res) => {
+  // #swagger.tags = ['Auth']
+  // #swagger.summary = 'Reset password'
+  // #swagger.description = 'Reset user password using token from email'
+  /* #swagger.requestBody = {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: 'object',
+              properties: {
+                token: { type: 'string', example: 'reset-token-here' },
+                password: { type: 'string', example: 'NewPassword123' }
+              }
+            }
+          }
+        }
+  } */
+  
   const { token, password } = req.body;
   
   if (!token || !password) {

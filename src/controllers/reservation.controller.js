@@ -7,6 +7,11 @@ import { sendReservationConfirmedEmail, sendReservationReturnedEmail } from '../
  * Get all reservations (admin only)
  */
 export const getAllReservations = async (req, res) => {
+  // #swagger.tags = ['Reservations']
+  // #swagger.summary = 'Get all reservations (Admin)'
+  // #swagger.description = 'Retrieve all reservations from all users (admin only)'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  
   // Check if user is admin
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
@@ -27,6 +32,11 @@ export const getAllReservations = async (req, res) => {
  * Get current user's reservations
  */
 export const getUserReservations = async (req, res) => {
+  // #swagger.tags = ['Reservations']
+  // #swagger.summary = 'Get user reservations'
+  // #swagger.description = 'Retrieve all reservations for the authenticated user'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  
   try {
     const reservations = await Reservation.findByUser(req.user._id);
     res.json(reservations);
@@ -39,6 +49,11 @@ export const getUserReservations = async (req, res) => {
  * Get a single reservation by ID
  */
 export const getReservationById = async (req, res) => {
+  // #swagger.tags = ['Reservations']
+  // #swagger.summary = 'Get reservation by ID'
+  // #swagger.description = 'Retrieve a single reservation by its ID'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  
   try {
     const reservation = await Reservation.findById(req.params.id).populate('locker');
     
@@ -61,6 +76,19 @@ export const getReservationById = async (req, res) => {
  * Create a new reservation
  */
 export const createReservation = async (req, res) => {
+  // #swagger.tags = ['Reservations']
+  // #swagger.summary = 'Create a reservation'
+  // #swagger.description = 'Create a new locker reservation'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  /* #swagger.requestBody = {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: '#/components/schemas/Reservation' }
+          }
+        }
+  } */
+  
   const { lockerId, hours } = req.body;
 
   if (!lockerId || !hours) {
@@ -139,6 +167,11 @@ export const createReservation = async (req, res) => {
  * Cancel a reservation
  */
 export const cancelReservation = async (req, res) => {
+  // #swagger.tags = ['Reservations']
+  // #swagger.summary = 'Cancel a reservation'
+  // #swagger.description = 'Cancel an existing reservation'
+  // #swagger.security = [{ "bearerAuth": [] }]
+  
   try {
     const reservation = await Reservation.findById(req.params.id);
 
