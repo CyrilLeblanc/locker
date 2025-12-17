@@ -144,7 +144,7 @@ export const sendReservationReminderEmail = async (
           <td style="padding: 8px; border: 1px solid #ddd;"><strong>Casier</strong></td>
           <td style="padding: 8px; border: 1px solid #ddd;">n°${
               locker.number
-          } - ${locker.location}</td>
+          }</td>
         </tr>
         <tr>
           <td style="padding: 8px; border: 1px solid #ddd;"><strong>Taille</strong></td>
