@@ -52,10 +52,7 @@ const PORT = process.env.MONGO_PORT;
 const DB_NAME = process.env.MONGO_DB_NAME;
 
 mongoose
-    .connect(`mongodb://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DB_NAME}`, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
+    .connect(`mongodb://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DB_NAME}`)
     .then(async () => {
         console.log("Connected to MongoDB");
         await seedDatabase(); // Seed the database after successful connection
