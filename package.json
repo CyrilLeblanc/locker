@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "swagger": "node swagger.js",
+    "dev": "nodemon -i swagger-output.json server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
